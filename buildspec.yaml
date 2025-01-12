@@ -35,7 +35,7 @@ phases:
       - cd ..
       # Create Elastic Beanstalk manifest file
       - |
-        cat << EOF > aws-windows-deployment-manifest.json
+        cat <<EOF > aws-windows-deployment-manifest.json
         {
           "manifestVersion": 1,
           "deployments": {
