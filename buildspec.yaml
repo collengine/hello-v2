@@ -1,0 +1,66 @@
+version: 0.2
+
+env:
+  variables:
+    CODEBUILD_LOG_LEVEL: DEBUG
+    DOTNET_ENVIRONMENT: Release
+
+phases:
+  install:
+    runtime-versions:
+      dotnet: "6.0"
+    commands:
+      - echo "Installing runtime dependencies..."
+      - dotnet --version
+      - dotnet nuget locals all --clear
+      - yum install -y zip
+
+  pre_build:
+    commands:
+      - echo "Restoring dependencies..."
+      - dotnet restore hello-v2.sln
+
+  build:
+    commands:
+      - echo "Building the project..."
+      - dotnet build hello-v2.sln --configuration Release
+      - echo "Publishing the project..."
+      - dotnet publish hello-v2/hello-v2.csproj --configuration Release --output ./publish
+
+  post_build:
+    commands:
+      - echo "Packaging for Elastic Beanstalk deployment..."
+      - cd publish
+      - zip -r ../deploy.zip *
+      - cd ..
+      # Create Elastic Beanstalk manifest file
+      - |
+        cat << EOF > aws-windows-deployment-manifest.json
+        {
+          "manifestVersion": 1,
+          "deployments": {
+            "aspNetCoreWeb": [
+              {
+                "name": "Hello",
+                "parameters": {
+                  "appBundle": "deploy.zip",
+                  "iisPath": "/",
+                  "iisWebSite": "Default Web Site"
+                }
+              }
+            ]
+          }
+        }
+        EOF
+      - zip -ur deploy.zip aws-windows-deployment-manifest.json
+
+artifacts:
+  files:
+    - deploy.zip
+    - aws-windows-deployment-manifest.json
+  discard-paths: no
+
+cache:
+  paths:
+    - '/root/.nuget/packages/**/*'
+    - 'obj/**/*'
