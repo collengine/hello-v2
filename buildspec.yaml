@@ -52,7 +52,7 @@ phases:
           }
         }
         EOF
-      - zip -ur deploy.zip aws-windows-deployment-manifest.json
+      # - zip -ur deploy.zip aws-windows-deployment-manifest.json
 
 artifacts:
   files:
