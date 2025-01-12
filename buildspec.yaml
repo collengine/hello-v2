@@ -57,7 +57,7 @@ phases:
 artifacts:
   files:
     - deploy.zip
-    - aws-windows-deployment-manifest.json
+    #- aws-windows-deployment-manifest.json
   discard-paths: no
 
 cache:
